@@ -17,79 +17,125 @@ public class PanelController implements Observer {
 
     @FXML public VBox vBoxProcess;
 
-    @FXML public ProgressBar pbProceso1;
-    @FXML public ProgressBar pbProceso2;
-    @FXML public ProgressBar pbProceso3;
-    @FXML public ProgressBar pbProceso4;
-    @FXML public ProgressBar pbProceso5;
-    @FXML public ProgressBar pbProceso6;
-    public ProgressBar progressBar = null;
-
-    @FXML public Label lblProces1;
-    @FXML public Label lblProces2;
-    @FXML public Label lblProces3;
-    @FXML public Label lblProces4;
-    @FXML public Label lblProces5;
-    @FXML public Label lblProces6;
+    @FXML public TextField txtNombre;
+    @FXML public TextField txtTiempo;
 
     @FXML public TableView<SJFProcess> processTable;
     @FXML public TableColumn<SJFProcess, Integer> columnId;
     @FXML public TableColumn<SJFProcess, String> columnName;
     @FXML public TableColumn<SJFProcess, Integer> columnTime;
     @FXML public TableColumn<SJFProcess, Integer> columnEntrada;
-
     @FXML public Button btnAddProces;
 
-    SJFProcess newProcess = null;
-
     public Map<Integer, List<SJFProcess>> mapProcess = new HashMap<>();
-    public Map<Integer, SJFProcess> mapProcessById;
-    public ObservableList<SJFProcess> tableViewList;
+    public ObservableList<SJFProcess> processList = FXCollections.observableArrayList();
+
+    public boolean sleep = false;
+    public double auxProgress = 0.0;
+    public Thread currentThread = null;
 
     @FXML
     public void initialize() {
-        inicializarProcesos(true);
+        this.createListOfProcess();
+
+        //Add progres bar of the process
+        processList.forEach(this::addProcessToUI);
+
+        //Fil table columns
+        columnEntrada.setCellValueFactory(new PropertyValueFactory<>("turn"));
+        columnId.setCellValueFactory(new PropertyValueFactory<>("id"));
+        columnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+        columnTime.setCellValueFactory(new PropertyValueFactory<>("time"));
+        processTable.setItems(processList);
+    }
+
+    public void createListOfProcess(){
+
+        SJFProcess sjf1 = new SJFProcess();
+        sjf1.setId(1);
+        sjf1.setName("Word");
+        sjf1.setTime(1000);
+        sjf1.setTurn(2);
+        sjf1.setComplete(false);
+        sjf1.addObserver(this);
+
+        SJFProcess sjf2 = new SJFProcess();
+        sjf2.setId(2);
+        sjf2.setName("Excel");
+        sjf2.setTime(1000);
+        sjf2.setTurn(1);
+        sjf2.setComplete(false);
+        sjf2.addObserver(this);
+
+        SJFProcess sjf3 = new SJFProcess();
+        sjf3.setId(3);
+        sjf3.setName("Power Point");
+        sjf3.setTime(400);
+        sjf3.setTurn(3);
+        sjf3.setComplete(false);
+        sjf3.addObserver(this);
+
+        SJFProcess sjf4 = new SJFProcess();
+        sjf4.setId(4);
+        sjf4.setName("Visual Studio");
+        sjf4.setTime(700);
+        sjf4.setTurn(4);
+        sjf4.setComplete(false);
+        sjf4.addObserver(this);
+
+        SJFProcess sjf5 = new SJFProcess();
+        sjf5.setId(5);
+        sjf5.setName("Terminal");
+        sjf5.setTime(600);
+        sjf5.setTurn(5);
+        sjf5.setComplete(false);
+        sjf5.addObserver(this);
+
+        SJFProcess sjf6 = new SJFProcess();
+        sjf6.setId(6);
+        sjf6.setName("Java");
+        sjf6.setTime(300);
+        sjf6.setTurn(6);
+        sjf6.setComplete(false);
+        sjf6.addObserver(this);
+
+        processList.addAll(sjf1,sjf2,sjf3,sjf4,sjf5,sjf6);
+    }
+
+    @FXML
+    public void createProcess(){
+        SJFProcess process = new SJFProcess();
+        process.setId(processList.size() + 1);
+        process.setName(txtNombre.getText());
+        process.setTime(Integer.parseInt(txtTiempo.getText()));
+        process.setTurn(processList.size() + 1);
+        process.setComplete(false);
+        process.addObserver(this);
+        processList.add(process);
+
+        txtNombre.setText("");
+        txtTiempo.setText("");
+
+        //60B38E
+
+        this.addProcessToMap(process);
+        this.addProcessToUI(process);
+
+        this.sleep = true;
+    }
+
+    public void addProcessToUI(SJFProcess process){
+        sleep = true;
+        this.addProcessToMap(process);
+        this.vBoxProcess.getChildren().add(process.getLabel());
+        this.vBoxProcess.getChildren().add(process.getProgressBar());
     }
 
     @FXML
     public void startProcess(){
-        inicializarProcesos(false);
-        new Thread(SJF()).start();
-    }
-
-    @FXML
-    public void addProcess(){
-        System.out.println("Proceso agregado");
-
-        //Create event runnable object
-        newProcess = new SJFProcess();
-        newProcess.setId(7);
-        newProcess.setName("Intellij");
-        newProcess.setTime(350);
-        newProcess.setTurn(7);
-        newProcess.setComplete(false);
-        newProcess.addObserver(this);
-        addProcessToMap(newProcess);
-
-        tableViewList.add(newProcess);
-        //processTable.setItems(tableViewList);
-
-        //Add to the queue
-
-        //Generate UI of the event
-        Label label = new Label();
-        label.setText(newProcess.getName());
-        VBox.setMargin(label, new Insets(0,0,2,0));
-
-        progressBar = new ProgressBar();
-        progressBar.setPrefWidth(newProcess.getTime());
-        progressBar.setProgress(0.0);
-        VBox.setMargin(progressBar, new Insets(0,0,10,0));
-
-        this.vBoxProcess.getChildren().add(label);
-        this.vBoxProcess.getChildren().add(progressBar);
-
-        btnAddProces.setDisable(true);
+        restartProcess();
+        currentThread = new Thread(SJF());
+        currentThread.start();
     }
 
     public void addProcessToMap(SJFProcess process){
@@ -102,95 +148,14 @@ public class PanelController implements Observer {
         }
     }
 
-    private void inicializarProcesos(boolean cleanList){
-
-        SJFProcess sjf1 = new SJFProcess();
-        sjf1.setId(1);
-        sjf1.setName("Word");
-        sjf1.setTime(1000);
-        sjf1.setTurn(2);
-        sjf1.setComplete(false);
-        sjf1.addObserver(this);
-        pbProceso1.setPrefWidth(sjf1.getTime());
-        pbProceso1.setProgress(0.0);
-        lblProces1.setText(sjf1.getName());
-        addProcessToMap(sjf1);
-
-        SJFProcess sjf2 = new SJFProcess();
-        sjf2.setId(2);
-        sjf2.setName("Excel");
-        sjf2.setTime(1000);
-        sjf2.setTurn(1);
-        sjf2.setComplete(false);
-        sjf2.addObserver(this);
-        pbProceso2.setPrefWidth(sjf2.getTime());
-        pbProceso2.setProgress(0.0);
-        lblProces2.setText(sjf2.getName());
-        addProcessToMap(sjf2);
-
-        SJFProcess sjf3 = new SJFProcess();
-        sjf3.setId(3);
-        sjf3.setName("Power Point");
-        sjf3.setTime(400);
-        sjf3.setTurn(3);
-        sjf3.setComplete(false);
-        sjf3.addObserver(this);
-        pbProceso3.setPrefWidth(sjf3.getTime());
-        pbProceso3.setProgress(0.0);
-        lblProces3.setText(sjf3.getName());
-        addProcessToMap(sjf3);
-
-        SJFProcess sjf4 = new SJFProcess();
-        sjf4.setId(4);
-        sjf4.setName("Visual Studio");
-        sjf4.setTime(700);
-        sjf4.setTurn(4);
-        sjf4.setComplete(false);
-        sjf4.addObserver(this);
-        pbProceso4.setPrefWidth(sjf4.getTime());
-        pbProceso4.setProgress(0.0);
-        lblProces4.setText(sjf4.getName());
-        addProcessToMap(sjf4);
-
-        SJFProcess sjf5 = new SJFProcess();
-        sjf5.setId(5);
-        sjf5.setName("Terminal");
-        sjf5.setTime(600);
-        sjf5.setTurn(5);
-        sjf5.setComplete(false);
-        sjf5.addObserver(this);
-        pbProceso5.setPrefWidth(sjf5.getTime());
-        pbProceso5.setProgress(0.0);
-        lblProces5.setText(sjf5.getName());
-        addProcessToMap(sjf5);
-
-        SJFProcess sjf6 = new SJFProcess();
-        sjf6.setId(6);
-        sjf6.setName("Java");
-        sjf6.setTime(300);
-        sjf6.setTurn(6);
-        sjf6.setComplete(false);
-        sjf6.addObserver(this);
-        pbProceso6.setPrefWidth(sjf6.getTime());
-        pbProceso6.setProgress(0.0);
-        lblProces6.setText(sjf6.getName());
-        addProcessToMap(sjf6);
-
-        if(cleanList){
-            tableViewList = FXCollections.observableArrayList(sjf1,sjf2,sjf3,sjf4,sjf5,sjf6);
-            if(progressBar != null){
-                progressBar.setProgress(0.0);
-            }
-            columnEntrada.setCellValueFactory(new PropertyValueFactory<>("turn"));
-            columnId.setCellValueFactory(new PropertyValueFactory<>("id"));
-            columnName.setCellValueFactory(new PropertyValueFactory<>("name"));
-            columnTime.setCellValueFactory(new PropertyValueFactory<>("time"));
-            processTable.setItems(tableViewList);
-        }
-
+    private void restartProcess(){
+        processList.forEach(process -> {
+            process.setComplete(false);
+            process.getProgressBar().setProgress(0.0);
+        });
     }
 
-    synchronized private SJFProcess SJF(){
+    private SJFProcess SJF(){
         Map<Integer, List<SJFProcess>> mapSortedByKey = mapProcess.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -243,23 +208,17 @@ public class PanelController implements Observer {
         double recorrido = (double) arg;
         SJFProcess sjfProcess = (SJFProcess) o;
         System.out.println( sjfProcess.getName() + recorrido);
-
-        switch(sjfProcess.getId()){
-            case 1: Platform.runLater(() -> pbProceso1.setProgress(recorrido)); break;
-            case 2: Platform.runLater(() -> pbProceso2.setProgress(recorrido)); break;
-            case 3: Platform.runLater(() -> pbProceso3.setProgress(recorrido)); break;
-            case 4: Platform.runLater(() -> pbProceso4.setProgress(recorrido)); break;
-            case 5: Platform.runLater(() -> pbProceso5.setProgress(recorrido)); break;
-            case 6: Platform.runLater(() -> pbProceso6.setProgress(recorrido)); break;
-            case 7: Platform.runLater(() -> progressBar.setProgress(recorrido)); break;
-        }
+        double recorridoArreglado = recorrido + auxProgress;
+        auxProgress = 0.0;
+        Platform.runLater(() -> sjfProcess.getProgressBar().setProgress(recorridoArreglado));
 
         if(recorrido >= 1.0){
             SJFProcess thread = SJF();
 
             System.out.println("CHECK VALID: " + thread);
             if(thread != null){
-                new Thread(thread).start();
+               currentThread =  new Thread(thread);
+               currentThread.start();
             } else {
                 System.out.println("ALGORITMO COMPLETO");
             }

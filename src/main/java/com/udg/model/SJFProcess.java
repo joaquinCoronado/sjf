@@ -2,6 +2,10 @@ package com.udg.model;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.geometry.Insets;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.VBox;
 
 import java.util.Observable;
 
@@ -14,6 +18,15 @@ public class SJFProcess extends Observable implements Runnable {
     private SimpleIntegerProperty time;
     private SimpleIntegerProperty turn;
     private SimpleBooleanProperty complete = new SimpleBooleanProperty(false);
+
+    public ProgressBar progressBar = new ProgressBar();
+    public Label label = new Label();
+
+    public SJFProcess(){
+        progressBar.setProgress(0.0);
+        VBox.setMargin(progressBar, new Insets(0,0,10,0));
+        VBox.setMargin(label, new Insets(0,0,2,0));
+    }
 
     /**
      * When an object implementing interface {@code Runnable} is used
@@ -100,5 +113,15 @@ public class SJFProcess extends Observable implements Runnable {
 
     public void setComplete(boolean complete) {
         this.complete = new SimpleBooleanProperty(complete);
+    }
+
+    public ProgressBar getProgressBar() {
+        progressBar.setPrefWidth(this.getTime());
+        return progressBar;
+    }
+
+    public Label getLabel() {
+        label.setText(this.getName());
+        return label;
     }
 }
