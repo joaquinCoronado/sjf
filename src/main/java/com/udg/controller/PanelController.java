@@ -17,6 +17,8 @@ public class PanelController implements Observer {
 
     @FXML public VBox vBoxProcess;
 
+    @FXML public ProgressIndicator piIsRunning;
+
     @FXML public TextField txtNombre;
     @FXML public TextField txtTiempo;
 
@@ -26,19 +28,27 @@ public class PanelController implements Observer {
     @FXML public TableColumn<SJFProcess, Integer> columnTime;
     @FXML public TableColumn<SJFProcess, Integer> columnEntrada;
     @FXML public Button btnAddProces;
+    @FXML public Button btnStartProcess;
 
     public Map<Integer, List<SJFProcess>> mapProcess = new HashMap<>();
     public ObservableList<SJFProcess> processList = FXCollections.observableArrayList();
 
-    public boolean sleep = false;
+    public boolean isRunning = false;
+
+    public boolean pendingProcess = false;
+    public double pendingProgress = 0.0;
+
     public double auxProgress = 0.0;
+    public SJFProcess stoppedProcess = null;
+    public SJFProcess currentProcess = null;
     public Thread currentThread = null;
+
 
     @FXML
     public void initialize() {
         this.createListOfProcess();
 
-        //Add progres bar of the process
+        //Add progress bar of the process
         processList.forEach(this::addProcessToUI);
 
         //Fil table columns
@@ -47,6 +57,9 @@ public class PanelController implements Observer {
         columnName.setCellValueFactory(new PropertyValueFactory<>("name"));
         columnTime.setCellValueFactory(new PropertyValueFactory<>("time"));
         processTable.setItems(processList);
+
+        //Progress indicator
+        piIsRunning.setVisible(false);
     }
 
     public void createListOfProcess(){
@@ -118,14 +131,21 @@ public class PanelController implements Observer {
 
         //60B38E
 
-        this.addProcessToMap(process);
+        //this.addProcessToMap(process);
         this.addProcessToUI(process);
 
-        this.sleep = true;
+        if(isRunning && process.getTime() < (currentProcess.getTime() - auxProgress)){
+            currentThread.interrupt();
+            stoppedProcess = currentProcess;
+            pendingProcess = true;
+            pendingProgress = auxProgress;
+            process.setComplete(true);
+            new Thread(process).start();
+        }
+        System.out.println("Aux progress: " + auxProgress);
     }
 
     public void addProcessToUI(SJFProcess process){
-        sleep = true;
         this.addProcessToMap(process);
         this.vBoxProcess.getChildren().add(process.getLabel());
         this.vBoxProcess.getChildren().add(process.getProgressBar());
@@ -133,8 +153,20 @@ public class PanelController implements Observer {
 
     @FXML
     public void startProcess(){
+        isRunning = true;
+        piIsRunning.setVisible(true);
+        pendingProcess = false;
+        pendingProgress = 0.0;
+
+        auxProgress = 0.0;
+        stoppedProcess = null;
+        currentProcess = null;
+        currentThread = null;
+
+        btnStartProcess.setDisable(true);
         restartProcess();
-        currentThread = new Thread(SJF());
+        currentProcess = SJF();
+        currentThread = new Thread(currentProcess);
         currentThread.start();
     }
 
@@ -151,11 +183,18 @@ public class PanelController implements Observer {
     private void restartProcess(){
         processList.forEach(process -> {
             process.setComplete(false);
+            process.setProgress(0.0);
             process.getProgressBar().setProgress(0.0);
         });
     }
 
     private SJFProcess SJF(){
+        if(stoppedProcess != null){
+            stoppedProcess.setProgress(pendingProgress);
+            System.out.println("return stopped process");
+            return stoppedProcess;
+        }
+
         Map<Integer, List<SJFProcess>> mapSortedByKey = mapProcess.entrySet()
                 .stream()
                 .sorted(Map.Entry.comparingByKey())
@@ -207,19 +246,29 @@ public class PanelController implements Observer {
     public void update(Observable o, Object arg) {
         double recorrido = (double) arg;
         SJFProcess sjfProcess = (SJFProcess) o;
-        System.out.println( sjfProcess.getName() + recorrido);
-        double recorridoArreglado = recorrido + auxProgress;
-        auxProgress = 0.0;
-        Platform.runLater(() -> sjfProcess.getProgressBar().setProgress(recorridoArreglado));
+        sjfProcess.setProgress(recorrido);
+
+        if(pendingProcess && stoppedProcess.getId().equals(sjfProcess.getId())){
+            stoppedProcess = null;
+            pendingProcess = false;
+            System.out.println("Proceso pendiente");
+        }
+
+        auxProgress = sjfProcess.getProgress();
+        System.out.println( sjfProcess.getName() + " - " + sjfProcess.getProgress() );
+        Platform.runLater(() -> sjfProcess.getProgressBar().setProgress(sjfProcess.getProgress()));
 
         if(recorrido >= 1.0){
-            SJFProcess thread = SJF();
+            currentProcess = SJF();
 
-            System.out.println("CHECK VALID: " + thread);
-            if(thread != null){
-               currentThread =  new Thread(thread);
+            System.out.println("CHECK VALID: " + currentProcess);
+            if(currentProcess != null){
+               currentThread = new Thread(currentProcess);
                currentThread.start();
             } else {
+                isRunning = false;
+                piIsRunning.setVisible(false);
+                btnStartProcess.setDisable(false);
                 System.out.println("ALGORITMO COMPLETO");
             }
         }

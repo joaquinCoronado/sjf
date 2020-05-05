@@ -4,95 +4,117 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="783.0" prefWidth="1063.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.udg.controller.PanelController">
+<AnchorPane minHeight="661.0" minWidth="1064.0" prefHeight="661.0" prefWidth="1064.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.udg.controller.PanelController">
    <children>
-      <Pane layoutX="16.0" layoutY="27.0" prefHeight="493.0" prefWidth="1032.0" style="-fx-background-color: #dce1e3#dce1e3;" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0">
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
+      <AnchorPane layoutX="15.0" layoutY="50.0" style="-fx-background-color: #dce1e3#dce1e3 #dce1e3#dce1e3 #dce1e3#dce1e3 #dce1e3#dce1e3;" AnchorPane.bottomAnchor="242.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="50.0">
          <children>
-            <VBox fx:id="vBoxProcess" layoutX="11.0" layoutY="-1.0" prefHeight="493.0" prefWidth="1000.0">
+            <ScrollPane layoutX="8.0" layoutY="14.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" pannable="true" style="-fx-background: #dce1e3; -fx-border-color: #dce1e3 #dce1e3;" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <content>
+                  <VBox fx:id="vBoxProcess" prefWidth="1000.0">
+                     <padding>
+                        <Insets top="10.0" />
+                     </padding>
+                  </VBox>
+               </content>
                <padding>
-                  <Insets top="10.0" />
+                  <Insets left="10.0" />
                </padding>
-            </VBox>
+            </ScrollPane>
          </children>
-      </Pane>
+      </AnchorPane>
       <Label layoutX="15.0" layoutY="24.0" style="-fx-font-size: 24;" text="Procesos" AnchorPane.topAnchor="15.0">
          <font>
             <Font name="System Bold" size="13.0" />
          </font>
       </Label>
-      <TableView fx:id="processTable" layoutX="654.0" layoutY="554.0" prefHeight="217.0" prefWidth="394.0">
-        <columns>
-          <TableColumn fx:id="columnId" prefWidth="57.0" text="Id" />
-          <TableColumn fx:id="columnName" prefWidth="154.0" text="Nombre" />
-            <TableColumn fx:id="columnTime" prefWidth="78.0" text="Tiempo" />
-            <TableColumn fx:id="columnEntrada" prefWidth="104.0" text="No. Entrada" />
-        </columns>
-      </TableView>
-      <Pane layoutY="554.0" prefHeight="217.0" prefWidth="193.0" style="-fx-background-color: #dce1e3#dce1e3 #dce1e3#dce1e3;" AnchorPane.leftAnchor="0.0">
+      <HBox layoutX="15.0" layoutY="429.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0">
          <children>
-            <VBox layoutX="14.0" layoutY="11.0" prefHeight="199.0" prefWidth="164.0">
+            <Pane prefHeight="217.0" prefWidth="193.0" style="-fx-background-color: #dce1e3#dce1e3 #dce1e3#dce1e3;">
                <children>
-                  <Label text="Acciones">
-                     <font>
-                        <Font name="System Bold" size="19.0" />
-                     </font>
-                  </Label>
-                  <Button fx:id="startProcess" mnemonicParsing="false" onAction="#startProcess" prefHeight="45.0" prefWidth="180.0" style="-fx-background-color: #216869;" text="Iniciar Algoritmo" textFill="WHITE">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </Button>
+                  <VBox layoutX="14.0" layoutY="11.0" prefHeight="199.0" prefWidth="164.0">
+                     <children>
+                        <Label text="Acciones">
+                           <font>
+                              <Font name="System Bold" size="19.0" />
+                           </font>
+                        </Label>
+                        <Button fx:id="btnStartProcess" mnemonicParsing="false" onAction="#startProcess" prefHeight="45.0" prefWidth="180.0" style="-fx-background-color: #216869;" text="Iniciar Algoritmo" textFill="WHITE">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Button>
+                        <ProgressIndicator fx:id="piIsRunning" prefHeight="30.0" prefWidth="30.0">
+                           <VBox.margin>
+                              <Insets left="50.0" top="40.0" />
+                           </VBox.margin>
+                        </ProgressIndicator>
+                     </children>
+                  </VBox>
                </children>
-            </VBox>
-         </children>
-      </Pane>
-      <Pane layoutX="221.0" layoutY="554.0" prefHeight="217.0" prefWidth="420.0" style="-fx-background-color: #dce1e3#dce1e3 #dce1e3#dce1e3;">
-         <children>
-            <VBox layoutX="10.0" layoutY="10.0" prefHeight="199.0" prefWidth="400.0">
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Pane>
+            <Pane prefHeight="217.0" prefWidth="420.0" style="-fx-background-color: #dce1e3#dce1e3 #dce1e3#dce1e3;">
                <children>
-                  <Label text="Nuevos Procesos">
-                     <font>
-                        <Font name="System Bold" size="19.0" />
-                     </font>
-                  </Label>
-                  <TextField fx:id="txtNombre" prefHeight="45.0" prefWidth="400.0" promptText="Nombre del proceso">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <TextField fx:id="txtTiempo" prefHeight="45.0" prefWidth="400.0" promptText="Tiempo del proceso">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                  </TextField>
-                  <Button fx:id="btnAddProces" mnemonicParsing="false" onAction="#createProcess" prefHeight="45.0" prefWidth="400.0" style="-fx-background-color: #49A078;" text="Agregar" textFill="#fcf9f9">
-                     <VBox.margin>
-                        <Insets top="10.0" />
-                     </VBox.margin>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </Button>
+                  <VBox layoutX="10.0" layoutY="10.0" prefHeight="199.0" prefWidth="400.0">
+                     <children>
+                        <Label text="Nuevos Procesos">
+                           <font>
+                              <Font name="System Bold" size="19.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="txtNombre" prefHeight="45.0" prefWidth="400.0" promptText="Nombre del proceso">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <TextField fx:id="txtTiempo" prefHeight="45.0" prefWidth="400.0" promptText="Tiempo del proceso">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                        </TextField>
+                        <Button fx:id="btnAddProces" mnemonicParsing="false" onAction="#createProcess" prefHeight="45.0" prefWidth="400.0" style="-fx-background-color: #49A078;" text="Agregar" textFill="#fcf9f9">
+                           <VBox.margin>
+                              <Insets top="10.0" />
+                           </VBox.margin>
+                           <cursor>
+                              <Cursor fx:constant="HAND" />
+                           </cursor>
+                        </Button>
+                     </children>
+                  </VBox>
                </children>
-            </VBox>
+               <HBox.margin>
+                  <Insets right="15.0" />
+               </HBox.margin>
+            </Pane>
+            <TableView fx:id="processTable" prefHeight="217.0" prefWidth="394.0">
+              <columns>
+                <TableColumn fx:id="columnId" prefWidth="57.0" text="Id" />
+                <TableColumn fx:id="columnName" prefWidth="154.0" text="Nombre" />
+                  <TableColumn fx:id="columnTime" prefWidth="78.0" text="Tiempo" />
+                  <TableColumn fx:id="columnEntrada" prefWidth="104.0" text="No. Entrada" />
+              </columns>
+            </TableView>
          </children>
-      </Pane>
+      </HBox>
    </children>
    <padding>
-      <Insets bottom="15.0" left="15.0" />
+      <Insets bottom="15.0" />
    </padding>
 </AnchorPane>

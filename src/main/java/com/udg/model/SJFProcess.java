@@ -1,5 +1,6 @@
 package com.udg.model;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.geometry.Insets;
@@ -18,6 +19,9 @@ public class SJFProcess extends Observable implements Runnable {
     private SimpleIntegerProperty time;
     private SimpleIntegerProperty turn;
     private SimpleBooleanProperty complete = new SimpleBooleanProperty(false);
+
+    private SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
+    private boolean stopped = false;
 
     public ProgressBar progressBar = new ProgressBar();
     public Label label = new Label();
@@ -41,7 +45,8 @@ public class SJFProcess extends Observable implements Runnable {
      */
     @Override
     public void run() {
-        double recorrido = 0.0;
+        System.out.println("initial progress: " + progress.get());
+        double recorrido = progress.get();
 
         while(recorrido < 1){
             recorrido = recorrido + 0.01;
@@ -52,7 +57,7 @@ public class SJFProcess extends Observable implements Runnable {
             this.clearChanged();
 
             try {
-                sleep(10);
+                sleep(50);
             } catch (InterruptedException e) {
                 System.out.println("Hilo interrumpido: " + this.name.get());
                 break;
@@ -123,5 +128,21 @@ public class SJFProcess extends Observable implements Runnable {
     public Label getLabel() {
         label.setText(this.getName());
         return label;
+    }
+
+    public double getProgress() {
+        return progress.get();
+    }
+
+    public void setProgress(double progress) {
+        this.progress = new SimpleDoubleProperty(progress);
+    }
+
+    public boolean isStopped() {
+        return stopped;
+    }
+
+    public void setStopped(boolean stopped) {
+        this.stopped = stopped;
     }
 }
